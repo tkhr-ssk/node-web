@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>index</title>
+    <style>
+        #result {
+            white-space: pre-wrap;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <h1>API Request</h1>
+    <div>
+        <h2>Request</h2>
+        Url:<br>
+        <select id="requestUrl">
+            <option>http://127.0.0.1:3000/</option>
+            <option>http://127.0.0.1:3000/api/</option>
+            <option>https://www.githubstatus.com/api/v2/summary.json</option>
+            <!-- <option>https://www.jma.go.jp/bosai/forecast/data/forecast/140000.json</option> -->
+        </select><br>
+        Bearer Token:<br>
+        <input id="token" type="text" size="64" placeholder="token" value=""><br>
+        Payload:<br>
+        <textarea id="payload" cols="64" rows="5" placeholder="payload"></textarea></br>
+        <button id="run">RUN</button>
+        <h2>Response</h2>
+        <pre id="status"></pre>
+        <pre id="result"></pre>
+        <pre id="responsetime"></pre>
+    </div>
+    <script>
+        $('#run').on('click', function () {
+            var token = $('#token').val();
+            var requestUrl = $('#requestUrl').val();
+            var payload = $('#payload').val();
+            console.log(payload);
+            console.log(token);
+            var options = {
+                url: requestUrl,
+                type: 'get',
+                dataType: 'json',
+                contentType: 'application/json',
+            };
+            if (token) {
+                options.headers = {
+                    'Authorization': 'Bearer ' + token
+                };
+            }
+            if (payload) {
+                options.data = payload;
+            }
+            console.log({ requestUrl, token });
+            $('#responsetime').text("");
+            $('#status').text("");
+            $('#result').text("");
+            const startTime = Date.now(); // 開始時間
+            $.ajax(options)
+                .done(function (data, textStatus, jqXHR ) {
+                    const endTime = Date.now(); // 終了時間
+                    console.log(JSON.stringify(data));
+                    $('#status').text("status: " + jqXHR.status);
+                    $('#result').text(JSON.stringify(data));
+                    $('#responsetime').text("ResponseTime: " + (endTime - startTime) + " ms");
+                })
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    const endTime = Date.now(); // 終了時間
+                    console.log("fail", jqXHR, textStatus, errorThrown);
+                    $('#responsetime').text("ResponseTime: " + (endTime - startTime) + " ms");
+                    $('#status').text("status: " + jqXHR.status);
+                    $('#result').text("fail");
+                    console.log(jqXHR.responseText);
+                    $('#result').text(jqXHR.responseText);
+                });
+        });
+    </script>
+</body>
+
+</html>
